@@ -33,7 +33,7 @@ public class EmployeeServlet extends HttpServlet {
             dispatcher = req.getRequestDispatcher("error-404.jsp");
         } else {
             req.setAttribute("employee", employee);
-            dispatcher = req.getRequestDispatcher("employee/delete.jsp");
+            dispatcher = req.getRequestDispatcher("employee/edit.jsp");
         }
 
         try {
@@ -71,7 +71,7 @@ public class EmployeeServlet extends HttpServlet {
             dispatcher = req.getRequestDispatcher("error-404.jsp");
         } else {
             req.setAttribute("employee", employee);
-            dispatcher = req.getRequestDispatcher("employee/delete.jsp");
+            dispatcher = req.getRequestDispatcher("employee/view.jsp");
         }
 
         try {
@@ -90,7 +90,7 @@ public class EmployeeServlet extends HttpServlet {
             dispatcher = req.getRequestDispatcher("error-404.jsp");
         } else {
             req.setAttribute("employees", employeeService.findAllEmployee());
-            dispatcher = req.getRequestDispatcher("employee/delete.jsp");
+            dispatcher = req.getRequestDispatcher("employee/list.jsp");
         }
 
         try {
@@ -100,4 +100,65 @@ public class EmployeeServlet extends HttpServlet {
         }
     }
 
+    private void createEmployee(HttpServletRequest req, HttpServletResponse resp) {
+        int id = (int) (Math.random() * 1000);
+        String name = req.getParameter("name");
+        int age = req.getIntHeader("age");
+        String role = req.getParameter("role");
+        String room = req.getParameter("room");
+        double salary = Double.parseDouble(req.getParameter("salary"));
+
+        Employee employee = new Employee(id, name, age, role, room, salary);
+
+        this.employeeService.createEmployee(employee);
+        req.setAttribute("message", "Create employee successful");
+        RequestDispatcher dispatcher = req.getRequestDispatcher("employee/create.jsp");
+
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void editEmployee(HttpServletRequest req, HttpServletResponse resp) {
+        int id = (int) (Math.random() * 1000);
+        String name = req.getParameter("name");
+        int age = req.getIntHeader("age");
+        String role = req.getParameter("role");
+        String room = req.getParameter("room");
+        double salary = Double.parseDouble(req.getParameter("salary"));
+
+        Employee employee = this.employeeService.findById(id);
+        RequestDispatcher dispatcher;
+
+        if (employee == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            employee.setName(name);
+            employee.setAge(age);
+            employee.setRole(role);
+            employee.setRoom(room);
+            employee.setSalary(salary);
+            req.setAttribute("message", "Update employee successful");
+            dispatcher = req.getRequestDispatcher("employee/edit.jsp");
+        }
+
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void deleteEmployee(HttpServletRequest req, HttpServletResponse resp) {
+        int id = Integer.parseInt(req.getParameter("id"));
+        Employee employee = this.employeeService.findById(id);
+        RequestDispatcher dispatcher;
+
+        if (employee == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            this.employeeService.deleteEmployee(id);
+            dispatcher = req.getRequestDispatcher("employee/list.jsp");
+        }
+    }
 }
