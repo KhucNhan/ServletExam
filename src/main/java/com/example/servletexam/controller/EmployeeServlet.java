@@ -5,14 +5,65 @@ import com.example.servletexam.service.EmployeeService;
 import com.example.servletexam.service.EmployeeServiceImpl;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
-
+@WebServlet(name = "EmployeeServlet", value = "/employees")
 public class EmployeeServlet extends HttpServlet {
     private final EmployeeService employeeService = new EmployeeServiceImpl();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if(action == null) {
+            action = "";
+        }
+
+        switch (action) {
+            case "create":
+                showCreateForm(req, resp);
+                break;
+            case "edit":
+                showEditForm(req, resp);
+                break;
+            case "delete":
+                showDeleteForm(req, resp);
+                break;
+            case "view":
+                viewEmployee(req, resp);
+                break;
+            default:
+                showEmployees(req, resp);
+                break;
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String action = req.getParameter("action");
+
+        if(action == null) {
+            action = "";
+        }
+
+        switch (action) {
+            case "create":
+                createEmployee(req, resp);
+                break;
+            case "edit":
+                editEmployee(req, resp);
+                break;
+            case "delete":
+                deleteEmployee(req, resp);
+                break;
+            default:
+                break;
+        }
+    }
 
     private void showCreateForm(HttpServletRequest req, HttpServletResponse resp) {
         RequestDispatcher dispatcher = req.getRequestDispatcher("employee/create.jsp");
@@ -83,7 +134,7 @@ public class EmployeeServlet extends HttpServlet {
     }
 
     private void showEmployees(HttpServletRequest req, HttpServletResponse resp) {
-        RequestDispatcher dispatcher = req.getRequestDispatcher("employee/list.jsp");
+        RequestDispatcher dispatcher;
         List<Employee> employees = this.employeeService.findAllEmployee();
 
         if (employees == null) {
@@ -103,7 +154,7 @@ public class EmployeeServlet extends HttpServlet {
     private void createEmployee(HttpServletRequest req, HttpServletResponse resp) {
         int id = (int) (Math.random() * 1000);
         String name = req.getParameter("name");
-        int age = req.getIntHeader("age");
+        int age = Integer.parseInt(req.getParameter("age"));
         String role = req.getParameter("role");
         String room = req.getParameter("room");
         double salary = Double.parseDouble(req.getParameter("salary"));
@@ -121,9 +172,9 @@ public class EmployeeServlet extends HttpServlet {
         }
     }
     private void editEmployee(HttpServletRequest req, HttpServletResponse resp) {
-        int id = (int) (Math.random() * 1000);
+        int id = Integer.parseInt(req.getParameter("id"));
         String name = req.getParameter("name");
-        int age = req.getIntHeader("age");
+        int age = Integer.parseInt(req.getParameter("age"));
         String role = req.getParameter("role");
         String room = req.getParameter("room");
         double salary = Double.parseDouble(req.getParameter("salary"));
@@ -158,7 +209,11 @@ public class EmployeeServlet extends HttpServlet {
             dispatcher = req.getRequestDispatcher("error-404.jsp");
         } else {
             this.employeeService.deleteEmployee(id);
-            dispatcher = req.getRequestDispatcher("employee/list.jsp");
+            try {
+                resp.sendRedirect("/employees");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
