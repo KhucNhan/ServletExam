@@ -64,6 +64,9 @@ public class EmployeeServlet extends HttpServlet {
             case "search":
                 searchByName(req, resp);
                 break;
+            case "filterByRoom":
+                filterByRoom(req, resp);
+                break;
             default:
                 break;
         }
@@ -88,6 +91,33 @@ public class EmployeeServlet extends HttpServlet {
             dispatcher = req.getRequestDispatcher("employee/list.jsp");
         }
 
+
+        req.setAttribute("employees", searchEmployees);
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void filterByRoom(HttpServletRequest req, HttpServletResponse resp) {
+        String filterValue = req.getParameter("filterValue");
+
+        List<Employee> employees = this.employeeService.findAllEmployee();
+        List<Employee> searchEmployees = new ArrayList<>();
+        RequestDispatcher dispatcher;
+
+        for (Employee employee : employees) {
+            if (employee.getRoom().equalsIgnoreCase(filterValue)) {
+                searchEmployees.add(employee);
+            }
+        }
+
+        if (filterValue == null || searchEmployees.isEmpty()) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            dispatcher = req.getRequestDispatcher("employee/list.jsp");
+        }
 
         req.setAttribute("employees", searchEmployees);
         try {
