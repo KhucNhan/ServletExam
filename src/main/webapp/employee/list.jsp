@@ -9,6 +9,10 @@
 <p>
     <a href="/employees?action=create">Create new employee</a>
 </p>
+<form action="/employees?action=search" method="post">
+    <input type="text" name="searchValue" placeholder="Search here">
+    <button type="submit" value="Search">Search</button>
+</form>
 <table border="1px">
     <tr>
         <td>Name</td>
