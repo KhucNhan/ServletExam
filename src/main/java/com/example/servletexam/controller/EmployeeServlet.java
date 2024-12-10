@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 @WebServlet(name = "EmployeeServlet", value = "/employees")
 public class EmployeeServlet extends HttpServlet {
@@ -60,8 +61,39 @@ public class EmployeeServlet extends HttpServlet {
             case "delete":
                 deleteEmployee(req, resp);
                 break;
+            case "search":
+                searchByName(req, resp);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void searchByName(HttpServletRequest req, HttpServletResponse resp) {
+        String name = req.getParameter("searchValue");
+
+        List<Employee> employees = this.employeeService.findAllEmployee();
+        List<Employee> searchEmployees = new ArrayList<>();
+        RequestDispatcher dispatcher;
+
+        for (Employee employee : employees) {
+            if (employee.getName().toLowerCase().contains(name.toLowerCase())) {
+                searchEmployees.add(employee);
+            }
+        }
+
+        if (name == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            dispatcher = req.getRequestDispatcher("employee/list.jsp");
+        }
+
+
+        req.setAttribute("employees", searchEmployees);
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -216,4 +248,6 @@ public class EmployeeServlet extends HttpServlet {
             }
         }
     }
+
+
 }
